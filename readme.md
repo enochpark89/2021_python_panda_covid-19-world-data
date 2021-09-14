@@ -95,3 +95,230 @@ df = df.rename(columns={'index': 'date'})
 df
 ```
 
+# Change your Jupyter themes.
+
+- If you don't like your Jupyter theme, you can change it after you install jupyterthemes.
+
+
+1. Install jupytertheme
+```py
+pip install jupyterthemes
+```
+2. Set the theme
+```py
+jt -t monokai
+# Change a theme to monokai.
+```
+
+# Setting up Time confirmed. 
+
+
+1. Take the sum().
+```py
+import pandas as pd
+df = pd.read_csv("data/time_confirmed.csv")
+df = df.sum()
+df
+```
+- sum only Latitude and Longitude as well which is what we do not want. 
+
+2. In order to drop some headers you do below, you use .drop().
+
+```py
+import pandas as pd
+df = pd.read_csv("data/time_confirmed.csv")
+df = df.drop(["Province/State", "Country/Region", "Lat", "Long"], axis=1).sum()
+df
+```
+Output:
+1/22/20          557
+1/23/20          655
+1/24/20          941
+1/25/20         1433
+1/26/20         2118
+             ...    
+9/4/21     220348745
+9/5/21     220775393
+9/6/21     221211222
+9/7/21     221932892
+9/8/21     222559803
+Length: 596, dtype: int64
+
+*We do not want series because the visualization only work with dataframe.*
+
+3. Make it look like an excel by adding .reset_index(name="total")
+
+```py
+import pandas as pd
+df = pd.read_csv("data/time_confirmed.csv")
+# Make like an excel spreadsheet
+df = df.drop(["Province/State", "Country/Region", "Lat", "Long"], axis=1).sum().reset_index(name="total")
+
+# Set the column name
+df = df.rename(columns={'index': 'date'})
+df
+```
+Output:
+	date	total
+0	1/22/20	557
+1	1/23/20	655
+2	1/24/20	941
+3	1/25/20	1433
+4	1/26/20	2118
+...	...	...
+591	9/4/21	220348745
+592	9/5/21	220775393
+593	9/6/21	221211222
+594	9/7/21	221932892
+595	9/8/21	222559803
+596 rows × 2 columns
+
+# Integrate Deaths, Confirmed and Recovered Data
+
+1. Iterate each data and make them into a dataframe. 
+
+```py
+import pandas as pd
+
+# Get data from three sources. 
+conditions = ["confirmed", "deaths", "recovered"]
+
+def make_df(condition):
+    df = pd.read_csv(f"data/time_{condition}.csv")
+    # Make like an excel spreadsheet
+    df = df.drop(["Province/State", "Country/Region", "Lat", "Long"], axis=1).sum().reset_index(name="total")
+
+    # Set the column name
+    df = df.rename(columns={'index': 'date'})
+    return df
+
+# Iterate each data and make them into a dataframe.
+for condition in conditions:
+    condition_df = make_df(condition)
+    print(condition_df)
+```
+Output:
+        date      total
+0    1/22/20        557
+1    1/23/20        655
+2    1/24/20        941
+3    1/25/20       1433
+4    1/26/20       2118
+..       ...        ...
+591   9/4/21  220348745
+592   9/5/21  220775393
+593   9/6/21  221211222
+594   9/7/21  221932892
+595   9/8/21  222559803
+
+[596 rows x 2 columns]
+        date    total
+0    1/22/20       17
+1    1/23/20       18
+2    1/24/20       26
+3    1/25/20       42
+4    1/26/20       56
+..       ...      ...
+591   9/4/21  4561905
+592   9/5/21  4568372
+593   9/6/21  4576291
+594   9/7/21  4586158
+595   9/8/21  4596394
+
+[596 rows x 2 columns]
+        date  total
+0    1/22/20     30
+1    1/23/20     32
+2    1/24/20     39
+3    1/25/20     42
+4    1/26/20     56
+..       ...    ...
+591   9/4/21      0
+592   9/5/21      0
+593   9/6/21      0
+594   9/7/21      0
+595   9/8/21      0
+
+[596 rows x 2 columns]
+
+2. Combine data.
+- Look at pandas documentation and see the get started guide.
+a. Merge
+b. Concat
+- *Merge:* merge dataframes. 
+
+- When the dataframe is returned, merge with the previous ones. 
+
+```py
+
+final_df = None
+
+for condition in conditions:
+    condition_df = make_df(condition)
+    # This will set the first one to be final_df
+    if final_df is None:
+        final_df = condition_df
+    # this will take leftover df and merge with the final_df
+    else:
+        final_df = final_df.merge(condition_df)
+final_df
+```
+
+3. Final product
+- finally, you will get the data below:
+```py
+import pandas as pd
+# Get data from three sources. 
+conditions = ["confirmed", "deaths", "recovered"]
+final_df = None
+
+def make_global_df(condition):
+    df = pd.read_csv(f"data/time_{condition}.csv")
+    df = (
+        df.drop(["Province/State", "Country/Region", "Lat", "Long"], axis=1)
+        .sum()
+        .reset_index(name=condition)
+    )
+    df = df.rename(columns={"index": "date"})
+    return df
+
+for condition in conditions:
+    condition_df = make_global_df(condition)
+    if final_df is None:
+        final_df = condition_df
+    else:
+        final_df = final_df.merge(condition_df)
+        
+final_df
+```
+
+# Get daily cases in the country
+
+1. Get a column by "Country" column
+
+```py
+df = pd.read_csv("data/time_confirmed.csv")
+
+# Locate a specific column that matches the condition provided.
+df = df.loc[df["Country/Region"] == "Afghanistan"]
+df = df.drop(columns=["Province/State", "Country/Region", "Lat", "Long"]).sum().reset_index(name="confirmed")
+df = df.rename(columns={'index':"date"})
+df
+```
+- Use method called .loc to locate a row that matches a boolean value.
+
+2. Modulize the code by making them into a function
+
+```py
+def make_country_df(condition, country):
+    df= pd.read.csv("data/time_confirmed.csv")
+    df = df.loc[df["Country/Region"]== "Afghanistan"]
+    df = df.drop(columns=["Province/State", "Country/Region", "Lat", "Long"]).sum().reset_index(name="confirmed")
+    df = df.rename(columns={'index':'date'})
+    return df
+```
+
+3. Final Recap
+
+- This is created so that the user can select country by a dropdown menu to get the Confirmed, Recovered, Deaths cases by a linear graph. 
+

@@ -198,6 +198,7 @@ for condition in conditions:
     print(condition_df)
 ```
 Output:
+
         date      total
 0    1/22/20        557
 1    1/23/20        655
@@ -266,6 +267,7 @@ final_df
 
 3. Final product
 - finally, you will get the data below:
+
 ```py
 import pandas as pd
 # Get data from three sources. 
@@ -321,4 +323,6 @@ def make_country_df(condition, country):
 3. Final Recap
 
 - This is created so that the user can select country by a dropdown menu to get the Confirmed, Recovered, Deaths cases by a linear graph. 
+
+# Code refactoring
 

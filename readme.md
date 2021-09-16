@@ -326,3 +326,170 @@ def make_country_df(condition, country):
 
 # Code refactoring
 
+- Modulization
+
+# Create a Dashboard
+
+1. Build a dashboard using Dash
+- Dash runs on top of Flask. 
+
+Default plotly Dashboard code:
+```py
+# Run this app with `python app.py` and
+# visit http://127.0.0.1:8050/ in your web browser.
+
+import dash
+import dash_core_components as dcc
+import dash_html_components as html
+import plotly.express as px
+import pandas as pd
+
+app = dash.Dash(__name__)
+
+# assume you have a "long-form" data frame
+# see https://plotly.com/python/px-arguments/ for more options
+df = pd.DataFrame({
+    "Fruit": ["Apples", "Oranges", "Bananas", "Apples", "Oranges", "Bananas"],
+    "Amount": [4, 1, 2, 2, 4, 5],
+    "City": ["SF", "SF", "SF", "Montreal", "Montreal", "Montreal"]
+})
+
+fig = px.bar(df, x="Fruit", y="Amount", color="City", barmode="group")
+
+app.layout = html.Div(children=[
+    html.H1(children='Hello Dash'),
+
+    html.Div(children='''
+        Dash: A web application framework for your data.
+    '''),
+
+    dcc.Graph(
+        id='example-graph',
+        figure=fig
+    )
+])
+
+if __name__ == '__main__':
+    app.run_server(debug=True)
+```
+
+2. Create a layout - put HTML on the screen.
+
+- you can create an HTML element using the function .layout
+
+```py
+app.layout = html.Div(
+    html.H1("Hello Dash!")
+)
+```
+
+- use HTML style
+
+```py
+app.layout = html.Div(
+    html.H1("Corona Dashboard"), style={"textAlign":"center", "minHeight": "100vh", "backgroundColor":"black", "color":"white"}
+)
+```
+
+- Create a header with style.
+```py
+# import external stylesheet that reset the css and Google fonts.
+stylesheets = [
+    "https://cdn.jsdelivr.net/npm/reset-css@5.0.1/reset.min.css",
+    "https://fonts.googleapis.com/css2?family=Open+Sans&display=swap",
+]
+
+app = dash.Dash(__name__, external_stylesheets=stylesheets)
+
+app.layout = html.Div(
+    style={
+        "minHeight": "100vh",
+        "backgroundColor": "#111111",
+        "color": "white",
+        "fontFamily":"Open Sans, sans-serif",
+    },
+    children =[
+        html.Header(
+            style={"textAlign":"center", "paddingTop": "50px"},
+            children=[html.H1("Corona Dashboard", style={"fontSize": 40})],
+        )
+    ]
+)
+```
+
+3. Create divs and tables
+
+In order to create the HTML table as below:
+```html
+<table>
+    <thead>
+        <tr>
+            <th colspan="2">The table header</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>The table body</td>
+            <td>with two columns</td>
+        </tr>
+    </tbody>
+</table>
+
+```
+you can use Dash function to create each elements
+```py
+app.layout = html.Div(
+    style={
+        "minHeight": "100vh",
+        "backgroundColor": "#111111",
+        "color": "white",
+        "fontFamily":"Open Sans, sans-serif",
+    },
+    children =[
+        html.Header(
+            style={"textAlign":"center", "paddingTop": "50px"},
+            children=[html.H1("Corona Dashboard", style={"fontSize": 40})],
+        ),
+        html.Div(
+            children=[
+                html.Div(
+                    children=[
+                        html.Table(
+                            children=[
+                                html.Thead(
+                                    children=[
+                                        html.Tr(
+                                            children=[
+                                                # Create the header of the table on every iteration
+                                                html.Th(column_name.replace("_", " "))
+                                                for column_name in countries_df.columns
+                                            ]
+                                        )
+                                    ]
+                                ),
+                                html.Tbody(
+                                    children=[
+                                        html.Tr(
+                                            children=[
+                                                html.Td(value_column)
+                                                for value_column in value
+                                            ]
+                                        )
+                                        for value in countries_df.values
+                                    ]
+                                ),
+                            ]
+                        )
+                    ]
+                )
+            ]
+        ),
+    ],
+)
+
+```
+
+4. Create functions that create table to clean the code
+
+```py
+```

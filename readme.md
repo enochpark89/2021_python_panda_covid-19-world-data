@@ -493,3 +493,129 @@ app.layout = html.Div(
 
 ```py
 ```
+
+5. Sort with the .sort_values() in pandas. 
+
+- sort by "confirmed"
+```py
+countries_df = countries_df.groupby("Country_Region").sum().sort_values(by="confirmed").reset_index()
+
+```
+
+# Plotly - Data Visualization.
+
+1. Import plotly.express as px. 
+
+```py
+import plotly.express as px
+from data import countries_df
+
+# Create a scatter plots using the countries_df (countries dataframes).
+fig = px.scatter_geo(countries_df)
+fig.show()
+```
+2. Using the locations argument, you can create a world map
+
+ex1: Create a worldmap using locations argument.
+```py
+import plotly.express as px
+from data import countries_df
+
+print(countries_df.head())
+
+fig = px.scatter_geo(countries_df, locations="Country_Region")
+fig.show()
+```
+
+ex2: Show locations using locationmode argument
+
+```py
+fig = px.scatter_geo(countries_df, locations="Country_Region", locationmode="country names")
+
+```
+
+ex3: Show the counter with colors
+
+```py
+
+```
+
+ex4: hovername - when the user hover over, show some effects.
+
+```py
+
+```
+
+ex5: Final Produce
+
+```py
+fig = px.scatter_geo(countries_df,
+    size="Confirmed",
+    # When the user hover, it shows the Country_Region data.
+    hover_name="Country_Region",
+    color="Confirmed",
+    locations="Country_Region",
+    locationmode="country names",
+    size_max=40,
+    template="plotly_dark",
+    hover_data={
+        "Confirmed": ":,2f",
+        "Deaths": ":,2f",
+        "Recovered": ":,2f",
+        "Country_Region": False
+    })
+```
+
+3. Put the created visuals to the HTML.
+
+a. create a bubble_map that shows all the scattered map. 
+
+```py
+bubble_map = px.scatter_geo(
+    countries_df,
+    size="Confirmed",
+    hover_name="Country_Region",
+    color="Confirmed",
+    locations="Country_Region",
+    locationmode="country names",
+    size_max=40,
+    template="plotly_dark",
+    projection="natural earth",
+    hover_data={
+        "Confirmed": ":,2f",
+        "Deaths": ":,2f",
+        "Recovered": ":,2f",
+        "Country_Region": False,
+    },
+)
+```
+
+b. Display on the HTML.
+```py
+    html.Div(
+        children=[
+            html.Div(children=[dcc.Graph(figure=bubble_map)]),
+            html.Div(children=[make_table(countries_df)]),
+        ]
+    ),
+```
+
+4. Create a bar graph
+
+- Need to use px.bar() provided by plotly and specify x and y.
+
+ex1: default px.bar()
+```py
+import plotly.express as px
+from data import totals_df
+
+fig= px.bar(totals_df, x="condition", y="count")
+fig.show()
+```
+ex2: you may change the background with a template argument. 
+
+5. Change the color with color_continous_scale. 
+
+```py
+color_continous_scale = px.colors.sequential.Oryel,
+```

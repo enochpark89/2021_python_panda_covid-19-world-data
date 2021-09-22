@@ -1,25 +1,23 @@
-# Run this app with `python app.py` and
-# visit http://127.0.0.1:8050/ in your web browser.
-
 import dash
 import dash_core_components as dcc
 import dash_html_components as html
+from dash.dependencies import Input, Output
 import plotly.express as px
-import pandas as pd
-from data import countries_df, totals_df
+from data import countries_df, totals_df, dropdown_options
 from builders import make_table
 
-# import external stylesheet that reset the css and Google fonts.
+# import styles anf fonts
 stylesheets = [
     "https://cdn.jsdelivr.net/npm/reset-css@5.0.1/reset.min.css",
-    "https://fonts.googleapis.com/css2?family=Open+Sans&display=swap",
+    "https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600&display=swap",
 ]
 
-app = dash.Dash(__name__, external_stylesheets=stylesheets)
 
+app = dash.Dash(__name__, external_stylesheets=stylesheets)
 bubble_map = px.scatter_geo(
     countries_df,
     size="Confirmed",
+    projection="equirectangular",
     hover_name="Country_Region",
     color="Confirmed",
     locations="Country_Region",
@@ -28,7 +26,6 @@ bubble_map = px.scatter_geo(
     title="Confirmed By Country",
     template="plotly_dark",
     color_continuous_scale=px.colors.sequential.Oryel,
-    projection="natural earth",
     hover_data={
         "Confirmed": ":,",
         "Deaths": ":,",
@@ -36,8 +33,9 @@ bubble_map = px.scatter_geo(
         "Country_Region": False,
     },
 )
-
-bubble_map.update_layout(margin=dict(l=0, r=0, t=50, b=0))
+bubble_map.update_layout(
+    margin=dict(l=0, r=0, t=50, b=0), coloraxis_colorbar=dict(xanchor="left", x=0)
+)
 
 bars_graph = px.bar(
     totals_df,
@@ -50,19 +48,16 @@ bars_graph = px.bar(
 )
 
 bars_graph.update_traces(marker_color=["#e74c3c", "#8e44ad", "#27ae60"])
-
-bars_graph.update_layout(xaxis=dict(title="Condition"), yaxis=dict(title="Count"))
-
 app.layout = html.Div(
     style={
         "minHeight": "100vh",
         "backgroundColor": "#111111",
         "color": "white",
-        "fontFamily":"Open Sans, sans-serif",
+        "fontFamily": "Open Sans, sans-serif",
     },
-    children =[
+    children=[
         html.Header(
-            style={"textAlign":"center", "paddingTop": "50px"},
+            style={"textAlign": "center", "paddingTop": "50px", "marginBottom": 100},
             children=[html.H1("Corona Dashboard", style={"fontSize": 40})],
         ),
         html.Div(
@@ -85,9 +80,22 @@ app.layout = html.Div(
                 "gap": 50,
                 "gridTemplateColumns": "repeat(4, 1fr)",
             },
-            children=[html.Div(children=[dcc.Graph(figure=bars_graph)]),],
+            children=[
+                html.Div(children=[dcc.Graph(figure=bars_graph)]),
+                html.Div(children=[dcc.Dropdown(id="country"),]),
+
+            ],
         ),
     ],
 )
-if __name__ == '__main__':
+
+
+@app.callback(Output("hello-output", "children"), [Input("country", "value")])
+def update_hello(value):
+    if value is None:
+        return "Hello Anonymous"
+    else:
+        return f"Hello {value}"
+
+if __name__ == "__main__":
     app.run_server(debug=True)

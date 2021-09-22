@@ -619,3 +619,67 @@ ex2: you may change the background with a template argument.
 ```py
 color_continous_scale = px.colors.sequential.Oryel,
 ```
+
+# Interactivity
+
+- We used panda to create HTML in python.
+- Dash Core Component makes dashboard interactive.
+- This is the way to create ReactJS with python. 
+
+1. Create a input and output
+
+under main.py
+```js
+from dash.dependencies import Input, Output
+
+// After div is created
+html.Div(
+    children=[
+        dcc.Input(placeholder="What is your name?", id="hello-input"),
+        html.H2(children="Hello anonymous", id="hello-output"),
+    ]
+),
+
+// This will take in inputs from the user and output results. This communicates with the id "hello-input" and "hello-output"
+@app.callback(Output("hello-output", "children"), [Input("hello-input", "value")])
+def update_hello(value):
+    if value is None:
+        return "Hello Anonymous"
+    else:
+        return f"Hello {value}"
+```
+
+- Recap
+- Two types of component: HTML, Dash_core
+- Dash_core can make an app interactive. 
+    - core component must be used with callback.
+
+# Create interactive dropdown
+
+- document > app.Dropdown()
+
+1. Create a dropdown form and data.
+
+main.py
+```py
+# 1. Import a dropdown_options
+from data import countries_df, totals_df, dropdown_options
+
+# 2. data.py > create dropdown_option that gets the country names.
+dropdown_options = countries_df.sort_values("Country_Region").reset_index()
+dropdown_options = dropdown_options["Country_Region"]
+
+# 3. Create html.div for the dropdown
+html.Div(children=[dcc.Dropdown(id="country"),]),
+
+# 4. Create a callback to show the messages that you want
+@app.callback(Output("hello-output", "children"), [Input("country", "value")])
+def update_hello(value):
+    if value is None:
+        return "Hello Anonymous"
+    else:
+        return f"Hello {value}"
+
+```
+
+2. Create a 

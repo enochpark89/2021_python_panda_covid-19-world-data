@@ -3,7 +3,13 @@ import dash_core_components as dcc
 import dash_html_components as html
 from dash.dependencies import Input, Output
 import plotly.express as px
-from data import countries_df, totals_df, dropdown_options
+from data import (
+    countries_df,
+    totals_df,
+    dropdown_options,
+    make_global_df,
+    make_country_df,
+)
 from builders import make_table
 
 # import styles anf fonts
@@ -82,7 +88,19 @@ app.layout = html.Div(
             },
             children=[
                 html.Div(children=[dcc.Graph(figure=bars_graph)]),
-                html.Div(children=[dcc.Dropdown(id="country"),]),
+                html.Div(
+                    style={"grid-column": "span 3"},
+                    children=[
+                        dcc.Dropdown(
+                            id="country",
+                            options=[
+                                {"label": country, "value": country}
+                                for country in dropdown_options
+                            ],
+                        ),
+                        dcc.Graph(id="country_graph"),
+                    ],
+                ),
 
             ],
         ),
@@ -90,12 +108,25 @@ app.layout = html.Div(
 )
 
 
-@app.callback(Output("hello-output", "children"), [Input("country", "value")])
+@app.callback(Output("country_graph", "figure"), [Input("country", "value")])
 def update_hello(value):
-    if value is None:
-        return "Hello Anonymous"
+    if value:
+        df = make_country_df(value)
     else:
-        return f"Hello {value}"
+        df = make_global_df()
+    fig = px.line(
+        df,
+        x="date",
+        y=["confirmed", "deaths", "recovered"],
+        template="plotly_dark",
+        labels={"value": "Cases", "variable": "Condition", "date": "Date"},
+        hover_data={"value": ":,", "variable": False, "date": False},
+    )
+    fig.update_xaxes(rangeslider_visible=True)
+    fig["data"][0]["line"]["color"] = "#e74c3c"
+    fig["data"][1]["line"]["color"] = "#8e44ad"
+    fig["data"][2]["line"]["color"] = "#27ae60"
+    return fig
 
 if __name__ == "__main__":
     app.run_server(debug=True)

@@ -12,14 +12,17 @@ from data import (
 )
 from builders import make_table
 
-# import styles anf fonts
 stylesheets = [
     "https://cdn.jsdelivr.net/npm/reset-css@5.0.1/reset.min.css",
     "https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600&display=swap",
 ]
 
-
 app = dash.Dash(__name__, external_stylesheets=stylesheets)
+
+app.title = "Sexy Dashboard"
+
+server = app.server
+
 bubble_map = px.scatter_geo(
     countries_df,
     size="Confirmed",
@@ -52,8 +55,8 @@ bars_graph = px.bar(
     title="Total Global Cases",
     labels={"condition": "Condition", "count": "Count", "color": "Condition"},
 )
-
 bars_graph.update_traces(marker_color=["#e74c3c", "#8e44ad", "#27ae60"])
+
 app.layout = html.Div(
     style={
         "minHeight": "100vh",
@@ -92,6 +95,12 @@ app.layout = html.Div(
                     style={"grid-column": "span 3"},
                     children=[
                         dcc.Dropdown(
+                            style={
+                                "width": 320,
+                                "margin": "0 auto",
+                                "color": "#111111",
+                            },
+                            placeholder="Select a Country",
                             id="country",
                             options=[
                                 {"label": country, "value": country}
@@ -101,7 +110,6 @@ app.layout = html.Div(
                         dcc.Graph(id="country_graph"),
                     ],
                 ),
-
             ],
         ),
     ],
@@ -127,6 +135,3 @@ def update_hello(value):
     fig["data"][1]["line"]["color"] = "#8e44ad"
     fig["data"][2]["line"]["color"] = "#27ae60"
     return fig
-
-if __name__ == "__main__":
-    app.run_server(debug=True)
